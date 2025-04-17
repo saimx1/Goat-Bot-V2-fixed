@@ -1,4 +1,4 @@
-const { getTime, drive } = global.utils;
+const { getTime } = global.utils;
 if (!global.temp.welcomeEvent)
 	global.temp.welcomeEvent = {};
 
@@ -114,16 +114,6 @@ module.exports = {
 
 					form.body = welcomeMessage;
 
-					if (threadData.data.welcomeAttachment) {
-						const files = threadData.data.welcomeAttachment;
-						const attachments = files.reduce((acc, file) => {
-							acc.push(drive.getFile(file, "stream"));
-							return acc;
-						}, []);
-						form.attachment = (await Promise.allSettled(attachments))
-							.filter(({ status }) => status == "fulfilled")
-							.map(({ value }) => value);
-					}
 					message.send(form);
 					delete global.temp.welcomeEvent[threadID];
 				}, 1500);
