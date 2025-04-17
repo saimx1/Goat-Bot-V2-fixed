@@ -1,5 +1,3 @@
-const { getExtFromUrl, drive, getStreamFromURL } = global.utils;
-
 module.exports = {
 	config: {
 		name: 'shortcut',
@@ -99,15 +97,11 @@ module.exports = {
 		switch (args[0]) {
 			case 'add': {
 				const split = body.split(' ').slice(2).join(' ').split('=>');
-				const attachments = [
-					...event.attachments,
-					...(event.messageReply?.attachments || [])
-				].filter(item => ["photo", 'png', "animated_image", "video", "audio"].includes(item.type));
 
 				let key = split[0];
 				let content = split.slice(1).join('=>');
 
-				if (!key || !content && attachments.length === 0)
+				if (!key || !content)
 					return message.reply(getLang('missingContent'));
 
 				key = key.trim().toLowerCase();
@@ -135,8 +129,6 @@ module.exports = {
 				shortCutData.push(newShortcut);
 				await threadsData.set(threadID, shortCutData, 'data.shortcut');
 				let msg = `${getLang('added', key, content)}\n`;
-				if (newShortcut.attachments.length > 0)
-					msg += getLang('addedAttachment', newShortcut.attachments.length);
 				message.reply(msg);
 				break;
 			}
@@ -199,11 +191,9 @@ module.exports = {
 							const keyword = x.key;
 							const numMessage = x.content ? 1 : 0;
 							const msgContent = numMessage ? `${numMessage} ${getLang("message")}, ` : "";
-							const numAttachments = x.attachments.length;
-							const msgAttachments = numAttachments ? `${x.attachments.length} ${getLang('attachment')}` : "";
 							const authorName = await usersData.getName(x.author);
 
-							return `[${num}] ${keyword} => ${msgContent}${msgAttachments} (${authorName})`;
+							return `[${num}] ${keyword} => ${msgContent} (${authorName})`;
 						})
 					)
 				).join('\n');
@@ -269,35 +259,19 @@ module.exports = {
 		const body = (event.body || '').toLowerCase();
 		const dataShortcut = await threadsData.get(threadID, 'data.shortcut', []);
 		const findShortcut = dataShortcut.find(x => x.key === body);
-		let attachments = [];
 		if (findShortcut) {
-			if (findShortcut.attachments.length > 0) {
-				for (const id of findShortcut.attachments)
-					attachments.push(drive.getFile(id, 'stream', true));
-				attachments = await Promise.all(attachments);
-			}
 
 			message.reply({
-				body: findShortcut.content,
-				attachment: attachments
+				body: findShortcut.content
 			});
 		}
 	}
 };
 
 async function createShortcut(key, content, attachments, threadID, senderID) {
-	let attachmentIDs = [];
-	if (attachments.length > 0)
-		attachmentIDs = attachments.map(attachment => new Promise(async (resolve) => {
-			const ext = attachment.type == "audio" ? "mp3" : getExtFromUrl(attachment.url);
-			const fileName = `${Date.now()}.${ext}`;
-			const infoFile = await drive.uploadFile(`shortcut_${threadID}_${senderID}_${fileName}`, attachment.type == "audio" ? "audio/mpeg" : undefined, await getStreamFromURL(attachment.url));
-			resolve(infoFile.id);
-		}));
 	return {
 		key: key.trim().toLowerCase(),
 		content,
-		attachments: await Promise.all(attachmentIDs),
 		author: senderID
 	};
 }
