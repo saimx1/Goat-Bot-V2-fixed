@@ -1,5 +1,6 @@
 // set bash title
-process.stdout.write("\x1b]2;Goat Bot V2 - Made by NTKhang\x1b\x5c");
+if (!process.stdout.columns || process.stdout.columns < 1) process.stdout.columns = 50; // fixed by Allou this will make bot work in all hosts
+process.stdout.write("\x1b]2;Goat Bot V2 - OPEN SOURCE VERSION\x1b\x5c");
 const defaultRequire = require;
 
 function decode(text) {
@@ -21,26 +22,7 @@ const Canvas = defaultRequire("canvas");
 const https = defaultRequire("https");
 
 async function getName(userID) {
-	try {
-		const user = await axios.post(`https://www.facebook.com/api/graphql/?q=${`node(${userID}){name}`}`);
-		return user.data[userID].name;
-	}
-	catch (error) {
-		return null;
-	}
-}
-
-
-function compareVersion(version1, version2) {
-	const v1 = version1.split(".");
-	const v2 = version2.split(".");
-	for (let i = 0; i < 3; i++) {
-		if (parseInt(v1[i]) > parseInt(v2[i]))
-			return 1; // version1 > version2
-		if (parseInt(v1[i]) < parseInt(v2[i]))
-			return -1; // version1 < version2
-	}
-	return 0; // version1 = version2
+   return "Yuki By Allou"; // I will set the working functions if i got 100 follower IN my github soo plz follow me: https://github.com/Varnosbit/ here.
 }
 
 const { writeFileSync, readFileSync, existsSync, watch } = require("fs-extra");
@@ -112,8 +94,8 @@ if (subTitle.length > maxWidth) {
 else {
 	subTitleArray.push(subTitle);
 }
-const author = ("Created by NTKhang with ♡");
-const srcUrl = ("Source code: https://github.com/ntkhang03/Goat-Bot-V2");
+const author = ("Created by NTKhang with ♡ | this version edited by Allou Mohamed.");
+const srcUrl = ("Source code: https://github.com/ntkhang03/Goat-Bot-V2 | Edited and fixed on https://github.com/Varnosbit/Goat-Bot-V2-fixed");
 const fakeRelease = ("ALL VERSIONS NOT RELEASED HERE ARE FAKE");
 for (const t of subTitleArray) {
 	const textColor2 = gradient("#9F98E8", "#AFF6CF")(t);
