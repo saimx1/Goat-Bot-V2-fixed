@@ -1,5 +1,3 @@
-const { drive, getStreamFromURL, getExtFromUrl, getTime } = global.utils;
-
 module.exports = {
 	config: {
 		name: "setleave",
@@ -25,13 +23,6 @@ module.exports = {
 					+ "\n  + {session}:  buổi trong ngày"
 					+ "\n\n   Ví dụ:"
 					+ "\n    {pn} text {userName} đã {type} khỏi nhóm, see you again 🤧"
-					+ "\n"
-					+ "\n   Reply (phản hồi) hoặc gửi kèm một tin nhắn có file với nội dung {pn} file: để thêm tệp đính kèm vào tin nhắn rời khỏi nhóm (ảnh, video, audio)"
-					+ "\n\nVí dụ:"
-					+ "\n   {pn} file reset: xóa gửi file",
-				attachment: {
-					[`${__dirname}/assets/guide/setleave/setleave_vi_1.png`]: "https://i.ibb.co/2FKJHJr/guide1.png"
-				}
 			},
 			en: {
 				body: "   {pn} on: Turn on leave message"
@@ -44,13 +35,6 @@ module.exports = {
 					+ "\n  + {session}: session in day"
 					+ "\n\n   Example:"
 					+ "\n    {pn} text {userName} has {type} group, see you again 🤧"
-					+ "\n"
-					+ "\n   Reply or send a message with file with content {pn} file: to add attachment file to leave message (image, video, audio)"
-					+ "\n\nExample:"
-					+ "\n   {pn} file reset: reset file",
-				attachment: {
-					[`${__dirname}/assets/guide/setleave/setleave_en_1.png`]: "https://i.ibb.co/2FKJHJr/guide1.png"
-				}
 			}
 		}
 	},
@@ -98,36 +82,6 @@ module.exports = {
 				message.reply(data.leaveMessage ? getLang("edited", data.leaveMessage) : getLang("reseted"));
 				break;
 			}
-			case "file": {
-				if (args[1] == "reset") {
-					const { leaveAttachment } = data;
-					if (!leaveAttachment)
-						return message.reply(getLang("noFile"));
-					try {
-						await Promise.all(data.leaveAttachment.map(fileId => drive.deleteFile(fileId)));
-						delete data.leaveAttachment;
-					}
-					catch (e) { }
-
-					await threadsData.set(threadID, {
-						data
-					});
-					message.reply(getLang("resetedFile"));
-				}
-				else if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0)) {
-					return message.reply(getLang("missingFile"), (err, info) => {
-						global.GoatBot.onReply.set(info.messageID, {
-							messageID: info.messageID,
-							author: senderID,
-							commandName
-						});
-					});
-				}
-				else {
-					saveChanges(message, event, threadID, senderID, threadsData, getLang);
-				}
-				break;
-			}
 			case "on":
 			case "off": {
 				settings.sendLeaveMessage = args[0] == "on";
@@ -139,35 +93,5 @@ module.exports = {
 				message.SyntaxError();
 				break;
 		}
-	},
-
-	onReply: async function ({ event, Reply, message, threadsData, getLang }) {
-		const { threadID, senderID } = event;
-		if (senderID != Reply.author)
-			return;
-
-		if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
-			return message.reply(getLang("missingFile"));
-		saveChanges(message, event, threadID, senderID, threadsData, getLang);
 	}
 };
-
-async function saveChanges(message, event, threadID, senderID, threadsData, getLang) {
-	const { data } = await threadsData.get(threadID);
-	const attachments = [...event.attachments, ...(event.messageReply?.attachments || [])].filter(item => ["photo", 'png', "animated_image", "video", "audio"].includes(item.type));
-	if (!data.leaveAttachment)
-		data.leaveAttachment = [];
-
-	await Promise.all(attachments.map(async attachment => {
-		const { url } = attachment;
-		const ext = getExtFromUrl(url);
-		const fileName = `${getTime()}.${ext}`;
-		const infoFile = await drive.uploadFile(`setleave_${threadID}_${senderID}_${fileName}`, await getStreamFromURL(url));
-		data.leaveAttachment.push(infoFile.id);
-	}));
-
-	await threadsData.set(threadID, {
-		data
-	});
-	message.reply(getLang("addedFile", attachments.length));
-}
