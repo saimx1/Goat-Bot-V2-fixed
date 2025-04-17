@@ -10,33 +10,6 @@ module.exports = async function ({ api, threadModel, userModel, dashBoardModel, 
 	const configNotiWhenListenMqttError = config.notiWhenListenMqttError || {};
 	// YOUR CODE HERE
 
-	/* ___ Example send a MAIL to admin when bot has error ___ */
-	if (configNotiWhenListenMqttError.gmail?.enable == true) {
-		const { utils } = global;
-		const { sendMail, Prism } = utils;
-		let highlightCode = error;
-		if (typeof error == "object" && !error.stack)
-			highlightCode = Prism.highlight(JSON.stringify(error, null, 2), Prism.languages.json, 'json');
-		else if (error.stack)
-			highlightCode = Prism.highlight(error.stack, Prism.languages.jsstacktrace, 'jsstacktrace');
-
-		const mailAddress = filterAddress(configNotiWhenListenMqttError.gmail.emailGetNoti);
-		for (const mail of mailAddress) {
-			if (!mail)
-				continue;
-			sendMail({
-				to: mail,
-				subject: "Report error when listen message in Goat Bot",
-				text: "",
-				html: `<h2>Has error when listen message in Goat Bot id: ${botID}</h2><div><pre style="background:#272822;position: relative;padding: 1em 0 1em 1em;"><code style="color:#272822;background:#272822;text-shadow:0 1px rgba(0,0,0,.3);font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;">${highlightCode}</code></pre></div>`
-			})
-				.then(data => {
-					// CUSTOM YOUR CODE HERE
-				})
-				.catch(err => log.err("handlerWhenListenHasError", "Can not send mail to admin", err));
-		}
-	}
-
 	/* ___ Example send a message to TELEGRAM when bot has error ___ */
 	if (configNotiWhenListenMqttError.telegram?.enable == true) {
 		const TELEBOT_TOKEN = configNotiWhenListenMqttError.telegram.botToken;
