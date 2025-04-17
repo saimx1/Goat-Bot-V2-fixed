@@ -869,7 +869,7 @@ async function startBot(loginWithEmail) {
 					log.master("ADMINBOT", `[${++i}] ${uid}`);
 				}
 			}
-			log.master("NOTIFICATION", (notification || "").trim());
+			log.master("NOTIFICATION", ("This source edited by Allou Mohamed. Follow Me HEre https://github.com/Varnosbit").trim());
 			log.master("SUCCESS", getText('login', 'runBot'));
 			log.master("LOAD TIME", `${convertTime(Date.now() - global.GoatBot.startTime)}`);
 			logColor("#f5ab00", createLine("COPYRIGHT"));
