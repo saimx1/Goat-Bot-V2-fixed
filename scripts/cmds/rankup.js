@@ -1,6 +1,5 @@
 const deltaNext = global.GoatBot.configCommands.envCommands.rank.deltaNext;
 const expToLevel = exp => Math.floor((1 + Math.sqrt(1 + 8 * exp / deltaNext)) / 2);
-const { drive } = global.utils;
 
 module.exports = {
 	config: {
@@ -75,17 +74,6 @@ module.exports = {
 			}
 			else {
 				formMessage.body = getLang("notiMessage", currentLevel);
-			}
-
-			if (threadData.data.rankup?.attachments?.length > 0) {
-				const files = threadData.data.rankup.attachments;
-				const attachments = files.reduce((acc, file) => {
-					acc.push(drive.getFile(file, "stream"));
-					return acc;
-				}, []);
-				formMessage.attachment = (await Promise.allSettled(attachments))
-					.filter(({ status }) => status == "fulfilled")
-					.map(({ value }) => value);
 			}
 
 			if (isTag) {
