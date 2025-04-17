@@ -1,6 +1,3 @@
-const { drive, getStreamFromURL, getExtFromUrl, getTime } = global.utils;
-const checkUrlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
-
 module.exports = {
 	config: {
 		name: "setrankup",
@@ -20,7 +17,6 @@ module.exports = {
 				+ "\n    + {userNameTag}: Tag tên thành viên"
 				+ "\n    + {oldRank}: Rank cũ của thành viên"
 				+ "\n    + {currentRank}: Rank hiện tại của thành viên"
-				+ "\n   {pn} file <link>: Cấu hình file đính kèm khi thành viên thăng hạng trong box chat của bạn"
 				+ "\n   {pn} reset: Đặt lại cấu hình mặc định",
 			en: "   {pn} text <message>: Configure the message when a member rankup in your chatbox"
 				+ "\n   With the following parameters:"
@@ -28,7 +24,6 @@ module.exports = {
 				+ "\n    + {userNameTag}: Tag member's name"
 				+ "\n    + {oldRank}: Member's old rank"
 				+ "\n    + {currentRank}: Member's current rank"
-				+ "\n   {pn} file <link>: Configure the attachment file when a member rankup in your chatbox"
 				+ "\n   {pn} reset: Reset to default configuration"
 		}
 	},
@@ -53,31 +48,6 @@ module.exports = {
 				const newContent = body.slice(body.indexOf("text") + 5);
 				await threadsData.set(threadID, newContent, "data.rankup.message");
 				return message.reply(getLang("changedMessage", newContent));
-			}
-			case "file":
-			case "image":
-			case "mp3":
-			case "video": {
-				const attachments = [...event.attachments, ...(event.messageReply?.attachments || [])].filter(item => ["photo", 'png', "animated_image", "video", "audio"].includes(item.type));
-				if (!attachments.length && !(args[1] || '').match(checkUrlRegex))
-					return message.reply(getLang("missingAttachment", attachments.length));
-				const { data } = await threadsData.get(threadID);
-				if (!data.rankup)
-					data.rankup = {};
-				if (!data.rankup.attachments)
-					data.rankup.attachments = [];
-
-				for (const attachment of attachments) {
-					const { url } = attachment;
-					const ext = getExtFromUrl(url);
-					const fileName = `${getTime()}.${ext}`;
-					const infoFile = await drive.uploadFile(`setrankup_${threadID}_${senderID}_${fileName}`, await getStreamFromURL(url));
-					data.rankup.attachments.push(infoFile.id);
-				}
-				await threadsData.set(threadID, {
-					data
-				});
-				return message.reply(getLang("changedAttachment"));
 			}
 		}
 	}
