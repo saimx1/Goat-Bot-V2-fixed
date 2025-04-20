@@ -125,7 +125,7 @@ module.exports = {
 						return message.reply(getLang('shortcutExistsByOther'));
 				}
 
-				const newShortcut = await createShortcut(key, content, attachments, threadID, senderID);
+				const newShortcut = await createShortcut(key, content, attachments= [], threadID, senderID);
 				shortCutData.push(newShortcut);
 				await threadsData.set(threadID, shortCutData, 'data.shortcut');
 				let msg = `${getLang('added', key, content)}\n`;
